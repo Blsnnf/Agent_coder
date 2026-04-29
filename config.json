@@ -1,0 +1,40 @@
+{
+    "system": {
+        "name": "Multi-Agent Auto-Coding System",
+        "version": "1.0.0",
+        "log_level": "INFO"
+    },
+    "agents": {
+        "architect": {
+            "enabled": true,
+            "max_concurrent_tasks": 2
+        },
+        "coder": {
+            "enabled": true,
+            "max_concurrent_tasks": 3,
+            "count": 2
+        },
+        "reviewer": {
+            "enabled": true,
+            "max_concurrent_tasks": 3
+        },
+        "debugger": {
+            "enabled": true,
+            "max_concurrent_tasks": 3
+        }
+    },
+    "executor": {
+        "timeout": 30,
+        "memory_limit": 512,
+        "network_enabled": false
+    },
+    "scheduler": {
+        "max_queue_size": 1000,
+        "dispatch_interval": 0.5
+    },
+    "web": {
+        "host": "0.0.0.0",
+        "port": 5000,
+        "debug": false
+    }
+}

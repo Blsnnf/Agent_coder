@@ -1,0 +1,783 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multi-Agent Auto-Coding System</title>
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --secondary: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --info: #3b82f6;
+            --bg-dark: #0f172a;
+            --bg-card: #1e293b;
+            --bg-input: #334155;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --border: #475569;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 0;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 30px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+
+        .logo h1 {
+            font-size: 24px;
+            font-weight: 600;
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: var(--bg-card);
+            border-radius: 20px;
+            font-size: 14px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--secondary);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* Grid Layout */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 20px;
+        }
+
+        .card {
+            background: var(--bg-card);
+            border-radius: 12px;
+            padding: 24px;
+            border: 1px solid var(--border);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .card-title {
+            font-size: 18px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .card-badge {
+            font-size: 12px;
+            padding: 4px 10px;
+            border-radius: 12px;
+            background: var(--primary);
+            color: white;
+        }
+
+        /* Stats Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: var(--bg-card);
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid var(--border);
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 14px;
+            margin-top: 4px;
+        }
+
+        /* Agent List */
+        .agent-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .agent-item {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 16px;
+            background: var(--bg-input);
+            border-radius: 8px;
+            transition: transform 0.2s;
+        }
+
+        .agent-item:hover {
+            transform: translateX(4px);
+        }
+
+        .agent-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+
+        .agent-info {
+            flex: 1;
+        }
+
+        .agent-name {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .agent-role {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .agent-status {
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .status-idle { background: var(--secondary); color: white; }
+        .status-working { background: var(--warning); color: white; }
+        .status-failed { background: var(--danger); color: white; }
+
+        /* Task List */
+        .task-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .task-item {
+            padding: 12px 16px;
+            background: var(--bg-input);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .task-priority {
+            width: 4px;
+            height: 40px;
+            border-radius: 2px;
+        }
+
+        .priority-high { background: var(--danger); }
+        .priority-normal { background: var(--info); }
+        .priority-low { background: var(--text-secondary); }
+
+        .task-info {
+            flex: 1;
+        }
+
+        .task-title {
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+
+        .task-meta {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        /* Code Editor */
+        .code-editor {
+            width: 100%;
+            min-height: 300px;
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 16px;
+            color: var(--text-primary);
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 14px;
+            resize: vertical;
+        }
+
+        .code-editor:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+        }
+
+        .btn-secondary {
+            background: var(--bg-input);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+        }
+
+        /* Form */
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px;
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 14px;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        select.form-input {
+            cursor: pointer;
+        }
+
+        /* Output */
+        .output-container {
+            margin-top: 20px;
+        }
+
+        .output-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .output-box {
+            background: #0d1117;
+            border-radius: 8px;
+            padding: 16px;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 13px;
+            max-height: 300px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+
+        .output-success { color: var(--secondary); }
+        .output-error { color: var(--danger); }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-input);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--text-secondary);
+        }
+
+        /* Full Width Card */
+        .full-width {
+            grid-column: 1 / -1;
+        }
+
+        /* Animation */
+        .fade-in {
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Loading */
+        .loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+            color: var(--text-secondary);
+        }
+
+        .spinner {
+            width: 24px;
+            height: 24px;
+            border: 3px solid var(--border);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 12px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo">
+                <div class="logo-icon">🤖</div>
+                <h1>Multi-Agent Auto-Coding</h1>
+            </div>
+            <div class="status-indicator">
+                <div class="status-dot"></div>
+                <span>System Online</span>
+            </div>
+        </header>
+
+        <!-- Stats -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-value" id="agentCount">0</div>
+                <div class="stat-label">Active Agents</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="taskCount">0</div>
+                <div class="stat-label">Total Tasks</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="completedTasks">0</div>
+                <div class="stat-label">Completed</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="executions">0</div>
+                <div class="stat-label">Code Executions</div>
+            </div>
+        </div>
+
+        <!-- Main Grid -->
+        <div class="grid">
+            <!-- Agents Card -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">
+                        <span>👥</span>
+                        Agents
+                    </div>
+                    <span class="card-badge" id="agentBadge">0 Active</span>
+                </div>
+                <div class="agent-list" id="agentList">
+                    <div class="loading">
+                        <div class="spinner"></div>
+                        Loading agents...
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tasks Card -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">
+                        <span>📋</span>
+                        Tasks
+                    </div>
+                    <span class="card-badge" id="taskBadge">0 Pending</span>
+                </div>
+                <div class="task-list" id="taskList">
+                    <div class="loading">
+                        <div class="spinner"></div>
+                        Loading tasks...
+                    </div>
+                </div>
+            </div>
+
+            <!-- Code Executor Card -->
+            <div class="card full-width">
+                <div class="card-header">
+                    <div class="card-title">
+                        <span>⚡</span>
+                        Code Executor
+                    </div>
+                </div>
+                <form id="codeForm">
+                    <div class="form-group">
+                        <label class="form-label">Language</label>
+                        <select class="form-input" id="language" name="language">
+                            <option value="python">Python</option>
+                            <option value="javascript">JavaScript</option>
+                            <option value="typescript">TypeScript</option>
+                            <option value="java">Java</option>
+                            <option value="go">Go</option>
+                            <option value="rust">Rust</option>
+                            <option value="bash">Bash</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Code</label>
+                        <textarea class="code-editor" id="code" name="code" placeholder="Enter your code here...">print("Hello from Multi-Agent System!")</textarea>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Standard Input (optional)</label>
+                        <input type="text" class="form-input" id="stdin" name="stdin" placeholder="Enter input for the program...">
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        <span>▶</span> Execute
+                    </button>
+                </form>
+                <div class="output-container" id="outputContainer" style="display: none;">
+                    <div class="output-header">
+                        <span class="card-title">
+                            <span>📤</span>
+                            Output
+                        </span>
+                        <span id="execStatus" class="card-badge"></span>
+                    </div>
+                    <div class="output-box" id="outputBox"></div>
+                </div>
+            </div>
+
+            <!-- Create Task Card -->
+            <div class="card full-width">
+                <div class="card-header">
+                    <div class="card-title">
+                        <span>➕</span>
+                        Create Task
+                    </div>
+                </div>
+                <form id="taskForm">
+                    <div class="form-group">
+                        <label class="form-label">Task Title</label>
+                        <input type="text" class="form-input" id="taskTitle" name="title" placeholder="Enter task title..." required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Description</label>
+                        <textarea class="form-input" id="taskDesc" name="description" rows="3" placeholder="Describe the task..."></textarea>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                        <div class="form-group">
+                            <label class="form-label">Task Type</label>
+                            <select class="form-input" id="taskType" name="task_type">
+                                <option value="general">General</option>
+                                <option value="code">Code Implementation</option>
+                                <option value="review">Code Review</option>
+                                <option value="debug">Debug/Fix</option>
+                                <option value="design">Design/Architecture</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Priority</label>
+                            <select class="form-input" id="taskPriority" name="priority">
+                                <option value="0">Low</option>
+                                <option value="1" selected>Normal</option>
+                                <option value="2">High</option>
+                                <option value="3">Critical</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        <span>➕</span> Create Task
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // API Base URL
+        const API_BASE = '/api';
+
+        // Fetch helpers
+        async function fetchJSON(url, options = {}) {
+            try {
+                const response = await fetch(url, options);
+                return await response.json();
+            } catch (error) {
+                console.error('API Error:', error);
+                return { status: 'error', message: error.message };
+            }
+        }
+
+        // Load stats
+        async function loadStats() {
+            const data = await fetchJSON(`${API_BASE}/stats`);
+            if (data.status === 'success') {
+                document.getElementById('agentCount').textContent = data.agent_count;
+                document.getElementById('taskCount').textContent = data.task_count;
+                document.getElementById('completedTasks').textContent = data.scheduler?.completed_tasks || 0;
+                document.getElementById('executions').textContent = data.executor?.total_executions || 0;
+            }
+        }
+
+        // Load agents
+        async function loadAgents() {
+            const data = await fetchJSON(`${API_BASE}/agents`);
+            const container = document.getElementById('agentList');
+            const badge = document.getElementById('agentBadge');
+
+            if (data.status === 'success' && data.count > 0) {
+                badge.textContent = `${data.count} Agent${data.count > 1 ? 's' : ''}`;
+                container.innerHTML = Object.values(data.agents).map(agent => `
+                    <div class="agent-item fade-in">
+                        <div class="agent-avatar" style="background: linear-gradient(135deg, #6366f1, #10b981);">
+                            ${getRoleIcon(agent.role)}
+                        </div>
+                        <div class="agent-info">
+                            <div class="agent-name">${agent.name}</div>
+                            <div class="agent-role">${agent.role}</div>
+                        </div>
+                        <span class="agent-status status-${agent.status}">${agent.status}</span>
+                    </div>
+                `).join('');
+            } else {
+                container.innerHTML = '<div class="loading">No agents registered</div>';
+            }
+        }
+
+        // Load tasks
+        async function loadTasks() {
+            const data = await fetchJSON(`${API_BASE}/tasks`);
+            const container = document.getElementById('taskList');
+            const badge = document.getElementById('taskBadge');
+
+            if (data.status === 'success') {
+                const tasks = Object.values(data.tasks);
+                const pending = tasks.filter(t => t.status === 'pending' || t.status === 'queued');
+                badge.textContent = `${pending.length} Pending`;
+
+                if (tasks.length > 0) {
+                    container.innerHTML = tasks.map(task => `
+                        <div class="task-item fade-in">
+                            <div class="task-priority priority-${getPriorityClass(task.priority)}"></div>
+                            <div class="task-info">
+                                <div class="task-title">${task.title || 'Untitled Task'}</div>
+                                <div class="task-meta">${task.task_type} • ${task.status}</div>
+                            </div>
+                            <span class="agent-status status-${task.status}">${task.status}</span>
+                        </div>
+                    `).join('');
+                } else {
+                    container.innerHTML = '<div class="loading">No tasks yet</div>';
+                }
+            }
+        }
+
+        // Helper functions
+        function getRoleIcon(role) {
+            const icons = {
+                architect: '🏗️',
+                coder: '💻',
+                reviewer: '🔍',
+                debugger: '🔧',
+                tester: '🧪',
+                orchestrator: '🎭'
+            };
+            return icons[role] || '🤖';
+        }
+
+        function getPriorityClass(priority) {
+            if (priority >= 3) return 'high';
+            if (priority >= 1) return 'normal';
+            return 'low';
+        }
+
+        // Form handlers
+        document.getElementById('codeForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const form = e.target;
+            const container = document.getElementById('outputContainer');
+            const outputBox = document.getElementById('outputBox');
+            const statusBadge = document.getElementById('execStatus');
+
+            container.style.display = 'block';
+            outputBox.innerHTML = '<span class="loading"><div class="spinner"></div>Executing...</span>';
+
+            const data = {
+                code: form.code.value,
+                language: form.language.value,
+                stdin: form.stdin.value || null
+            };
+
+            const result = await fetchJSON(`${API_BASE}/execute`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+
+            if (result.status === 'success') {
+                const r = result.result;
+                statusBadge.textContent = r.status;
+                statusBadge.className = `card-badge ${r.status === 'success' ? 'status-success' : 'status-error'}`;
+
+                let output = '';
+                if (r.stdout) output += `<span class="output-success">${escapeHtml(r.stdout)}</span>`;
+                if (r.stderr) output += `<span class="output-error">${escapeHtml(r.stderr)}</span>`;
+                if (r.error) output += `<span class="output-error">Error: ${escapeHtml(r.error)}</span>`;
+
+                output += `\n\n⏱️ Execution time: ${r.execution_time.toFixed(3)}s`;
+                output += `\n📊 Return code: ${r.return_code}`;
+
+                outputBox.innerHTML = output || 'No output';
+            } else {
+                outputBox.innerHTML = `<span class="output-error">Error: ${result.message}</span>`;
+            }
+
+            loadStats(); // Refresh stats
+        });
+
+        document.getElementById('taskForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const form = e.target;
+
+            const data = {
+                title: form.title.value,
+                description: form.description.value,
+                task_type: form.task_type.value,
+                priority: parseInt(form.priority.value)
+            };
+
+            const result = await fetchJSON(`${API_BASE}/tasks`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+
+            if (result.status === 'success') {
+                alert('Task created successfully!');
+                form.reset();
+                loadTasks();
+                loadStats();
+            } else {
+                alert('Failed to create task: ' + result.message);
+            }
+        });
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Initial load
+        loadStats();
+        loadAgents();
+        loadTasks();
+
+        // Auto refresh
+        setInterval(() => {
+            loadStats();
+            loadAgents();
+            loadTasks();
+        }, 5000);
+    </script>
+</body>
+</html>
