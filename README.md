@@ -1,14 +1,3 @@
----
-AIGC:
-    ContentProducer: Minimax Agent AI
-    ContentPropagator: Minimax Agent AI
-    Label: AIGC
-    ProduceID: "00000000000000000000000000000000"
-    PropagateID: "00000000000000000000000000000000"
-    ReservedCode1: 3045022100c4592a7846dc75b56bb33e0b801a404a02d8adfd3c3e57844ef4f7059e34e8020220448619adafbef36ebddb6007495c9499c31a8688b75e1a4c5e97a129d212f753
-    ReservedCode2: 304402204ba1ca6573b0dfcef54275e0c9f00e43ff3e6ac758515a188195fad5d99394400220219fbf4a2744a2253212bfb5875e6dacdff91ab66f17bcbe4c0d95b82bc89e0e
----
-
 # Multi-Agent Collaborative Auto-Programming System
 # 多智能体协同自动编程系统
 
