@@ -1,4 +1,3 @@
-# Multi-Agent Collaborative Auto-Programming System
 # 多智能体协同自动编程系统
 
 一个基于多智能体协作的自动编程系统，支持架构设计、代码编写、代码审查、调试等多种任务。
